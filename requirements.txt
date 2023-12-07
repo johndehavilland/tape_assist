@@ -1,0 +1,6 @@
+openai==0.28
+flask
+gunicorn
+python-dotenv
+flask-cors
+azure-storage-blob

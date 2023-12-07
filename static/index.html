@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Tape Reviewer</title>
+  <!-- Bootstrap CSS link -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+
+  <h1 class="mb-4">AI Powered Video Tape Reviewer</h1>
+
+  <div class="form-group">
+    <label for="containerName">Select Container:</label>
+    <select id="containerSelect" class="form-control"></select>
+  </div>
+
+  <button class="btn btn-primary mb-3" onclick="listBlobs()">List Blobs</button>
+
+    <!-- Loading spinner for list blobs -->
+    <div id="listBlobsSpinner" class="spinner-border text-primary" role="status" style="display: none;">
+        <span class="sr-only">Loading...</span>
+      </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Blobs:</h2>
+      <select id="blobList" size="10" class="form-control" onchange="loadBlobContent()"></select>
+    </div>
+
+    <div class="col-md-6">
+      <h2>Blob Content:</h2>
+      <textarea id="blobContent" rows="10" class="form-control" readonly></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn-primary mt-3" onclick="summarizeContent()">Explain</button>
+
+  <!-- Loading spinner for explain -->
+  <div id="explainSpinner" class="spinner-border text-primary" role="status" style="display: none;">
+    <span class="sr-only">Loading...</span>
+  </div>
+
+  <!-- <p id="summaryResult" class="mt-2"></p> -->
+  <!-- Add this table to your HTML where you want the data to be displayed -->
+<table id="recordings" class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Title</th>
+      <th scope="col">Date</th>
+      <th scope="col">Summary</th>
+      <th scope="col">Entities</th>
+      <th scope="col">Categories</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be added here by JavaScript -->
+  </tbody>
+</table>
+
+  <!-- Bootstrap JS and Popper.js script links (order matters) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    const apiUrl = 'http://localhost:5000';  // Update with your actual Flask API endpoint
+
+    // Load containers when the page is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch(`${apiUrl}/list_containers`)
+        .then(response => response.json())
+        .then(data => {
+          const containerSelectElement = document.getElementById('containerSelect');
+          data.containers.forEach(container => {
+            const option = document.createElement('option');
+            option.value = container;
+            option.textContent = container;
+            containerSelectElement.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Error listing containers:', error));
+    });
+
+    function listBlobs() {
+
+         // Show loading spinner
+      document.getElementById('listBlobsSpinner').style.display = 'inline-block';
+
+      const containerName = document.getElementById('containerSelect').value;
+
+
+      fetch(`${apiUrl}/list_blobs?container_name=${containerName}`)
+        .then(response => response.json())
+        .then(data => {
+          const blobListElement = document.getElementById('blobList');
+          blobListElement.innerHTML = '';
+
+          data.blobs.forEach(blob => {
+            const option = document.createElement('option');
+            option.value = blob;
+            option.textContent = blob;
+            blobListElement.appendChild(option);
+          });
+          // Hide loading spinner
+          document.getElementById('listBlobsSpinner').style.display = 'none';
+
+        })
+        .catch(error => {
+          console.error('Error listing blobs:', error);
+          // Hide loading spinner in case of an error
+          document.getElementById('listBlobsSpinner').style.display = 'none';
+        });
+    }
+
+    function loadBlobContent() {
+      const selectedBlobElement = document.getElementById('selectedBlob');
+      const blobListElement = document.getElementById('blobList');
+      const blobContentElement = document.getElementById('blobContent');
+      
+      const selectedBlob = blobListElement.value;
+      //selectedBlobElement.value = selectedBlob;
+
+      const containerName = document.getElementById('containerSelect').value;
+
+      fetch(`${apiUrl}/get_blob?container_name=${containerName}&blob_name=${selectedBlob}`)
+        .then(response => response.json())
+        .then(data => {
+          blobContentElement.value = data.blob_content;
+        })
+        .catch(error => console.error('Error loading blob content:', error));
+    }
+
+    function summarizeContent() {
+      const blobContent = document.getElementById('blobContent').value;
+      const containerName = document.getElementById('containerSelect').value;
+
+      const blobListElement = document.getElementById('blobList');
+      
+      const selectedBlob = blobListElement.value;
+
+      const date = extractDateFromBlobName(selectedBlob);
+      // Show loading spinner
+      document.getElementById('explainSpinner').style.display = 'inline-block';
+
+      
+
+      // Call the /explain endpoint with the extracted date and blob content
+      fetch(`${apiUrl}/explain`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: date,
+          text_content: blobContent,
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        // document.getElementById('summaryResult').textContent = data.explain;
+        // Clear previous content
+        const tbody = document.getElementById('recordings').querySelector('tbody');
+
+        // Clear the tbody
+        tbody.innerHTML = '';
+
+        // Parse the 'explain' entity into JSON
+        const recordingResults = JSON.parse(data.explain);
+        // Iterate over each recording in the data
+        recordingResults.recordings.forEach(recording => {
+          // Create a new row for each recording
+          const row = document.createElement('tr');
+
+          // Create a new cell for each field in the recording
+          Object.values(recording).forEach(field => {
+            const cell = document.createElement('td');
+            cell.textContent = Array.isArray(field) ? field.join(', ') : field;
+            row.appendChild(cell);
+          });
+
+          tbody.appendChild(row);
+         // Hide loading spinner
+         document.getElementById('explainSpinner').style.display = 'none';
+      })})
+      .catch(error => {
+        console.error('Error explaining content:', error);
+        // Hide loading spinner in case of an error
+        document.getElementById('explainSpinner').style.display = 'none';
+      });
+    }
+
+    function extractDateFromBlobName(blobName) {
+      // Assuming the date is the first part of the file name, extract it
+      const dateRegex = /^\d{4}-\d{2}-\d{2}/;
+      const match = blobName.match(dateRegex);
+      return match ? match[0] : null;
+    }
+  </script>
+
+</body>
+</html>

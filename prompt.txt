@@ -1,0 +1,39 @@
+Create an array of recordings and their description, entities (maximum of 3 entites) and most relevant key categories (maximum of 3). Create a JSON output in the following format: "{recordings:[{"title":"", "date":"", "summary":"", "entites":[], "categories":[]]}. Make sure the JSON response is complete json.
+
+Use the following key categories for ranking the value of recordings
+
+1. **Historical Significance:**
+   - Assess the historical importance of the events covered in the tape. Consider whether the content captures pivotal moments, major developments, or significant changes in the local community.
+
+2. **Local Relevance:**
+   - Evaluate how relevant the content is to the local context of Cincinnati. Tapes covering events specific to the city or region may hold higher value, especially if they contribute to the understanding of local history.
+
+3. **Prominent Figures:**
+   - Consider tapes that feature interviews, coverage, or stories about well-known individuals in the community, political figures, or notable personalities from that time period.
+
+4. **Community Impact:**
+   - Examine the tapes for coverage of events that had a direct impact on the community, such as local elections, community initiatives, or issues that were of significant concern to residents.
+
+5. **Cultural and Social Trends:**
+   - Evaluate tapes that provide insights into the cultural and social trends of the time. This may include coverage of changes in technology, lifestyle, or popular culture relevant to the community.
+
+6. **Unique or Rare Content:**
+   - Identify tapes with unique or rare content that may not be easily accessible elsewhere. This could include exclusive interviews, behind-the-scenes footage, or content that provides a different perspective on well-known events.
+
+7. **Diversity of Topics:**
+   - Aim for a diverse representation of topics to ensure a well-rounded view of the news coverage during that time period. This could include tapes covering different subject matters and themes.
+
+8. **Major National Events:**
+   - Assess tapes that provide local perspectives on major national or global events. Understanding how the local community experienced and reacted to these events can add historical depth.
+
+9. **Quality of Recordings:**
+   - Consider the quality of the recordings, as tapes with clear audio and video quality may be more valuable for archival purposes.
+
+10. **Legal and Ethical Considerations:**
+    - Ensure that the content complies with legal and ethical standards. Be cautious with tapes that include sensitive or controversial material, and handle them responsibly.
+
+11. **Memorable or Iconic Moments:**
+    - Identify tapes that capture memorable or iconic moments in the community's history. This could include celebrations, milestones, or events that are widely remembered.
+
+12. **Public Interest:**
+    - Consider the potential public interest in certain topics or events. Tapes that align with current or ongoing public interest may hold increased value.
